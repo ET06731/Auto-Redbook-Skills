@@ -208,23 +208,37 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
-  # 基本用法（封面在最后，正文卡片在前）
-  python publish_new.py -t "我的标题" -d "正文内容" -i card_1.png card_2.png cover.png
+  # 通过 md 文件传入正文（推荐）
+  python publish_xhs.py -t "我的标题" -f note.md -i card_1.png card_2.png cover.png
+
+  # 直接传入正文文本
+  python publish_xhs.py -t "我的标题" -d "正文内容" -i cover.png
 
   # 设为私密笔记
-  python publish_new.py -t "我的标题" -d "正文内容" -i cover.png --private
+  python publish_xhs.py -t "我的标题" -f note.md -i cover.png --private
 
   # 定时发布
-  python publish_new.py -t "我的标题" -d "正文内容" -i cover.png --post-time "2024-12-01 10:00:00"
+  python publish_xhs.py -t "我的标题" -f note.md -i cover.png --post-time "2024-12-01 10:00:00"
 """,
     )
     parser.add_argument("--title", "-t", required=True, help="笔记标题（建议不超过 20 字）")
-    parser.add_argument("--desc", "-d", default="", help="笔记描述/正文内容")
+    parser.add_argument("--desc", "-d", default="", help="笔记描述/正文内容（与 --desc-file 二选一）")
+    parser.add_argument("--desc-file", "-f", default=None, help="从 Markdown 文件读取正文内容（优先于 --desc）")
     parser.add_argument("--images", "-i", nargs="+", required=True, help="图片文件路径（可以多个）")
     parser.add_argument("--private", action="store_true", help="是否设为私密笔记")
     parser.add_argument("--post-time", default=None, help="定时发布时间（格式：2024-01-01 12:00:00）")
 
     args = parser.parse_args()
+
+    # 正文内容：优先从文件读取，其次使用 --desc 文本
+    desc = args.desc
+    if args.desc_file:
+        desc_path = Path(args.desc_file)
+        if not desc_path.exists():
+            print(f"❌ 错误: 正文文件不存在 - {args.desc_file}")
+            sys.exit(1)
+        desc = desc_path.read_text(encoding="utf-8")
+        print(f"📄 已读取正文文件: {args.desc_file} ({len(desc)} 字符)")
 
     cookie = load_cookie()
     validate_cookie(cookie)
@@ -236,7 +250,7 @@ def main():
     try:
         publisher.publish(
             title=args.title,
-            desc=args.desc,
+            desc=desc,
             images=valid_images,
             is_private=args.private,
             post_time=args.post_time,
