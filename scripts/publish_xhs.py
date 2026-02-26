@@ -4,14 +4,17 @@
 小红书笔记发布脚本
 
 使用方法:
-    # 基本发布
-    python publish_new.py -t "标题" -d "正文描述" -i cover.png card_1.png card_2.png
+    # 通过 md 文件传入正文（推荐）
+    python publish_xhs.py -t "我的标题" -f note.md -i card_1.png card_2.png cover.png
+
+    # 直接传入正文文本
+    python publish_xhs.py -t "我的标题" -d "正文内容" -i cover.png
 
     # 设为私密笔记
-    python publish_new.py -t "标题" -d "正文描述" -i cover.png --private
+    python publish_xhs.py -t "标题" -d "正文描述" -i cover.png --private
 
     # 定时发布
-    python publish_new.py -t "标题" -d "正文描述" -i cover.png --post-time "2024-12-01 10:00:00"
+    python publish_xhs.py -t "标题" -d "正文描述" -i cover.png --post-time "2024-12-01 10:00:00"
 
 环境变量:
     在脚本同目录或项目根目录下创建 .env 文件，配置：
